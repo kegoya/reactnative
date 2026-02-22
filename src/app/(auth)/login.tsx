@@ -19,7 +19,7 @@ export default function LoginScreen() {
         <Text style={style.subtitle}>Sign In to Continue</Text>
         <View style={style.form}>
           <TextInput
-            placeholder="Email...."
+            placeholder="Email"
             placeholderTextColor={"#999"}
             keyboardType="email-address"
             autoComplete="email"
@@ -27,7 +27,7 @@ export default function LoginScreen() {
             style={style.input}
           />
           <TextInput
-            placeholder="Password...."
+            placeholder="Password"
             placeholderTextColor={"#999"}
             autoComplete="password"
             autoCapitalize="none"

@@ -1,6 +1,9 @@
+import { useAuth } from "@/src/context/AuthContext";
 import { useRouter } from "expo-router";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {
+  ActivityIndicator,
+  Alert,
   StyleSheet,
   Text,
   TextInput,
@@ -10,7 +13,36 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function SignUpScreen() {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [isloading, setIsLoading] = useState(false);
+
   const router = useRouter();
+  const { signUp } = useAuth();
+
+  useEffect(() => {
+    router.push("/(auth)/onboarding");
+  }, []);
+
+  const handleSignUp = async () => {
+    if (!email || !password) {
+      Alert.alert("Error", "Please fill in all fields");
+    }
+    if (password.length < 4) {
+      Alert.alert("Error", "Password must be at least 3 characters");
+    }
+
+    setIsLoading(true);
+
+    try {
+      await signUp(email, password);
+    } catch (error) {
+      Alert.alert("Error", "Failed to signup.Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
     <SafeAreaView edges={["top", "bottom"]} style={style.container}>
       <View style={style.content}>
@@ -18,23 +50,31 @@ export default function SignUpScreen() {
         <Text style={style.subtitle}>Sign Up to Get Started</Text>
         <View style={style.form}>
           <TextInput
-            placeholder="Email...."
+            placeholder="Email"
             placeholderTextColor={"#999"}
             keyboardType="email-address"
             autoComplete="email"
             autoCapitalize="none"
+            value={email}
+            onChangeText={setEmail}
             style={style.input}
           />
           <TextInput
-            placeholder="Password...."
+            placeholder="Password"
             placeholderTextColor={"#999"}
             autoComplete="password"
             autoCapitalize="none"
             secureTextEntry
+            value={password}
+            onChangeText={setPassword}
             style={style.input}
           />
-          <TouchableOpacity style={style.button}>
-            <Text style={style.buttonText}>Sign Up</Text>
+          <TouchableOpacity style={style.button} onPress={handleSignUp}>
+            {isloading ? (
+              <ActivityIndicator size={24} color="#fff" />
+            ) : (
+              <Text style={style.buttonText}>Sign Up</Text>
+            )}
           </TouchableOpacity>
 
           <TouchableOpacity

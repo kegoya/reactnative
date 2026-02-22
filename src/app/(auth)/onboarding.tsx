@@ -3,6 +3,7 @@ import React, { useState } from "react";
 import {
   ActivityIndicator,
   Alert,
+  Image,
   StyleSheet,
   Text,
   TextInput,
@@ -37,6 +38,33 @@ export default function SignUpScreen() {
     }
   };
 
+  const takePhoto = async () => {
+    const { status } = await ImagePicker.requestCameraPermissionsAsync();
+    if (status !== "granted") {
+      Alert.alert(
+        "Premission need",
+        "We need camera permission to take a photo",
+      );
+      return;
+    }
+    const result = await ImagePicker.launchCameraAsync({
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 0.8,
+    });
+    if (!result.canceled && result.assets[0]) {
+      setProfileImage(result.assets[0].uri);
+    }
+  };
+
+  const showImagePicker = () => {
+    Alert.alert("Select Profile Image", "Choose an Option", [
+      { text: "Camera", onPress: takePhoto },
+      { text: "Photo Gallary", onPress: pickImage },
+      { text: "Cancel", style: "cancel" },
+    ]);
+  };
+
   const handleComplete = async () => {
     if (!name || !username) {
       Alert.alert("Error", "Please fill in all fields");
@@ -54,10 +82,20 @@ export default function SignUpScreen() {
         </View>
 
         <View style={style.form}>
-          <TouchableOpacity style={style.imageContainer} onPress={pickImage}>
-            <View style={style.placeholderImage}>
-              <Text style={style.placeholderText}>+</Text>
-            </View>
+          <TouchableOpacity
+            style={style.imageContainer}
+            onPress={showImagePicker}
+          >
+            {profileImage ? (
+              <Image
+                source={{ uri: profileImage }}
+                style={style.profileImage}
+              />
+            ) : (
+              <View style={style.placeholderImage}>
+                <Text style={style.placeholderText}>+</Text>
+              </View>
+            )}
             <View style={style.editBadge}>
               <Text style={style.editText}>Edit</Text>
             </View>
@@ -122,11 +160,17 @@ const style = StyleSheet.create({
     marginBottom: 32,
     position: "relative",
   },
-  placeholderImage: {
-    width: 200,
-    height: 200,
+  profileImage: {
+    width: 300,
+    height: 300,
+    borderRadius: 1500,
     backgroundColor: "#f5f5f5",
-    borderRadius: 100,
+  },
+  placeholderImage: {
+    width: 300,
+    height: 300,
+    backgroundColor: "#f5f5f5",
+    borderRadius: 150,
     justifyContent: "center",
     alignItems: "center",
     borderWidth: 2,
@@ -143,13 +187,13 @@ const style = StyleSheet.create({
     bottom: 0,
     right: 0,
     backgroundColor: "#000",
-    paddingHorizontal: 12,
+    paddingHorizontal: 30,
     paddingVertical: 6,
-    borderRadius: 16,
+    borderRadius: 20,
   },
   editText: {
     color: "#fff",
-    fontSize: 15,
+    fontSize: 24,
     fontWeight: "600",
   },
 

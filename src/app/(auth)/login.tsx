@@ -1,6 +1,9 @@
+import { useAuth } from "@/src/context/AuthContext";
 import { useRouter } from "expo-router";
-import React from "react";
+import React, { useState } from "react";
 import {
+  ActivityIndicator,
+  Alert,
   StyleSheet,
   Text,
   TextInput,
@@ -10,7 +13,29 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function LoginScreen() {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [isloading, setIsLoading] = useState(false);
+  const { signIn } = useAuth();
   const router = useRouter();
+
+  const handleSignIn = async () => {
+    if (!email || !password) {
+      Alert.alert("Error", "Please fill in all fields");
+    }
+
+    setIsLoading(true);
+
+    try {
+      await signIn(email, password);
+      router.push("/(tabs)");
+    } catch (error) {
+      console.log(error);
+      Alert.alert("Error", "Failed to signin.Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   return (
     <SafeAreaView edges={["top", "bottom"]} style={style.container}>
@@ -24,6 +49,8 @@ export default function LoginScreen() {
             keyboardType="email-address"
             autoComplete="email"
             autoCapitalize="none"
+            value={email}
+            onChangeText={setEmail}
             style={style.input}
           />
           <TextInput
@@ -32,10 +59,16 @@ export default function LoginScreen() {
             autoComplete="password"
             autoCapitalize="none"
             secureTextEntry
+            value={password}
+            onChangeText={setPassword}
             style={style.input}
           />
-          <TouchableOpacity style={style.button}>
-            <Text style={style.buttonText}>Sign In</Text>
+          <TouchableOpacity style={style.button} onPress={handleSignIn}>
+            {isloading ? (
+              <ActivityIndicator size={24} color="#fff" />
+            ) : (
+              <Text style={style.buttonText}>Sign In</Text>
+            )}
           </TouchableOpacity>
 
           <TouchableOpacity

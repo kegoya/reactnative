@@ -14,7 +14,7 @@ interface AuthContextType {
   user: User | null;
   //isLoading: boolean;
   signUp: (email: string, password: string) => Promise<void>;
-  //signIn: (email: string, password: string) => Promise<void>;
+  signIn: (email: string, password: string) => Promise<void>;
   updateUser: (userData: Partial<User>) => Promise<void>;
   //signOut: () => Promise<void>;
 }
@@ -153,7 +153,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ user, signUp, updateUser }}>
+    <AuthContext.Provider value={{ user, signUp, updateUser, signIn }}>
       {children}
     </AuthContext.Provider>
   );

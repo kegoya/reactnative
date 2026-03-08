@@ -1,4 +1,8 @@
+import { useAuth } from "@/src/context/AuthContext";
+import { supabase } from "@/src/lib/supabase/client";
+import { uploadProfileImage } from "@/src/lib/supabase/storage";
 import * as ImagePicker from "expo-image-picker";
+import { useRouter } from "expo-router";
 import React, { useState } from "react";
 import {
   ActivityIndicator,
@@ -17,6 +21,8 @@ export default function SignUpScreen() {
   const [username, setUsername] = useState("");
   const [isloading, setIsLoading] = useState(false);
   const [profileImage, setProfileImage] = useState<string | null>(null);
+  const { user, updateUser } = useAuth();
+  const router = useRouter();
 
   const pickImage = async () => {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -68,6 +74,56 @@ export default function SignUpScreen() {
   const handleComplete = async () => {
     if (!name || !username) {
       Alert.alert("Error", "Please fill in all fields");
+    }
+    if (username.length < 4) {
+      Alert.alert("Error", "Username must be at least 4 characters");
+    }
+
+    setIsLoading(true);
+
+    try {
+      // Check if username exists
+      const { data: existingUser } = await supabase
+        .from("profile")
+        .select("id")
+        .eq("username", username)
+        .neq("id", user.id)
+        .single();
+
+      if (existingUser) {
+        Alert.alert(
+          "Error",
+          "This username ia already taken.Please choose another one.",
+        );
+        setIsLoading(false);
+        return;
+      }
+      let profileImageUrl: string | undefined;
+      if (profileImage) {
+        try {
+          profileImageUrl = await uploadProfileImage(user.id, profileImage);
+        } catch (error) {
+          console.error("Error uploading profile image:", error);
+          Alert.alert(
+            "Warning",
+            "Failed to upload profile image. Continuing without image.",
+          );
+        }
+      }
+
+      // Update profile
+      await updateUser({
+        name,
+        username,
+        profileImage: profileImageUrl,
+        onboardingCompleted: true,
+      });
+      router.replace("/(tabs)");
+    } catch (error) {
+      console.log(error);
+      Alert.alert("Error", "Failed to complete setup.Please try again.");
+    } finally {
+      setIsLoading(false);
     }
   };
 

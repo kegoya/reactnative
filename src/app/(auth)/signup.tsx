@@ -1,6 +1,6 @@
 import { useAuth } from "@/src/context/AuthContext";
 import { useRouter } from "expo-router";
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import {
   ActivityIndicator,
   Alert,
@@ -20,23 +20,21 @@ export default function SignUpScreen() {
   const router = useRouter();
   const { signUp } = useAuth();
 
-  useEffect(() => {
-    router.push("/(auth)/onboarding");
-  }, []);
-
   const handleSignUp = async () => {
     if (!email || !password) {
       Alert.alert("Error", "Please fill in all fields");
     }
-    if (password.length < 4) {
-      Alert.alert("Error", "Password must be at least 3 characters");
+    if (password.length < 6) {
+      Alert.alert("Error", "Password must be at least 6 characters");
     }
 
     setIsLoading(true);
 
     try {
       await signUp(email, password);
+      router.push("/(auth)/onboarding");
     } catch (error) {
+      console.log(error);
       Alert.alert("Error", "Failed to signup.Please try again.");
     } finally {
       setIsLoading(false);
